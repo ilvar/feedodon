@@ -1,0 +1,7 @@
+.vscode
+.idea
+.pycharm
+
+*.pyc
+
+db.sqlite3
