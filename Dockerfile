@@ -9,4 +9,6 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
+RUN python manage.py migrate
+
 CMD ["gunicorn", "feedodon2.wsgi:application", "--bind", "0.0.0.0:8080", "--log-file", "-", "--access-logfile", "-"]
