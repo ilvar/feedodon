@@ -27,7 +27,7 @@ def timelines_home(request):
         params["max_id"] = int(request.GET.get("max_id"))
     if request.GET.get("since_id"):
         params["since_id"] = int(request.GET.get("since_id"))
-    return _generic_feed_data(request, lambda c: [p.to_md_json() for p in c.get_get_home(**params)])
+    return _generic_feed_data(request, lambda c: [p.to_md_json() for p in c.get_home(**params)])
 
 def status_detail(request, md_id):
     return _generic_feed_data(request, lambda c: c.get_post(md_id)[0].to_md_json())
