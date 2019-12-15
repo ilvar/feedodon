@@ -52,7 +52,7 @@ class Client:
             params["created-before"] = max_created_at
         if min_created_at:
             params["created-after"] = min_created_at
-        ff_data = self.request(self.HOME_URL + "?" % urllib.parse.urlencode(params)).json()
+        ff_data = self.request(self.HOME_URL + "?" + urllib.parse.urlencode(params))
         posts = [Post.from_feed_json(p, ff_data["users"], ff_data["attachments"]) for p in ff_data["posts"]]
         
         return posts
@@ -71,3 +71,7 @@ class Client:
     def get_user_timeline(self, md_id):
         # TODO
         return []
+    
+    def post(self):
+        # TODO: posting AND commenting
+        return None
