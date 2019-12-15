@@ -9,7 +9,7 @@ class FfToMdConvertorMixin:
 
     @staticmethod
     def dt_to_md(dt):
-        return dt
+        return arrow.get(dt).format('YYYY-MM-DDTHH:mm:ss.SSS') + "Z"
 
 
 class User(models.Model, FfToMdConvertorMixin):
@@ -108,11 +108,17 @@ class Post(models.Model, FfToMdConvertorMixin):
                 updated_at=Post.dt_from_frf(ff_comment["updatedAt"]),
             )
 
+    def get_absolute_url(self):
+        if self.parent is not None:
+            return "https://freefeed.org/%s/%s" % (self.parent.user.username, self.parent.pk)
+        else:
+            return "https://freefeed.org/%s/%s" % (self.user.username, self.pk)
+
     def to_md_json(self):
         return {
             "id": self.pk,
-            "uri": "https://freefeed.org/%s/%s" % (self.user.username, self.pk),
-            "url": "https://freefeed.org/%s/%s" % (self.user.username, self.pk),
+            "uri": self.get_absolute_url(),
+            "url": self.get_absolute_url(),
             "account": self.user.to_md_json(),
             "content": self.body,
             "created_at": Post.dt_to_md(self.created_at),

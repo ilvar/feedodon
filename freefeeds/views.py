@@ -33,7 +33,10 @@ def status_detail(request, md_id):
     return _generic_feed_data(request, lambda c: c.get_post(md_id)[0].to_md_json())
 
 def status_context(request, md_id):
-    return _generic_feed_data(request, lambda c: [p.to_md_json() for p in c.get_post(md_id)[1:]])
+    return _generic_feed_data(request, lambda c: {
+      "ancestors": [],
+      "descendants": [p.to_md_json() for p in c.get_post(md_id)[1:]]
+    })
 
 def filters(request):
     return _generic_feed_data(request, lambda c: [])

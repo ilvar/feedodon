@@ -8,8 +8,8 @@ urlpatterns = [
 
     path('timelines/public', views.timelines_public),
     path('timelines/home', views.timelines_home),
-    path('statuses/<int:md_id>', views.status_detail),
     path('statuses/<int:md_id>/context', views.status_context),
+    path('statuses/<int:md_id>', views.status_detail),
 
     path('filters', views.filters),
     path('notifications', views.notifications),

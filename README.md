@@ -20,7 +20,7 @@ little effort.
 You need pipenv to set up the project, then
 
 ```
-pipenv run manage.py runserver
+pipenv run python manage.py runserver
 ```
 
 Again, most Mastodon clients won't work on non-standard ports and
