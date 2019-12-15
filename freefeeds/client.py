@@ -27,7 +27,8 @@ class Client:
         }
     
     def request(self, url):
-        return requests.get(url, headers=self.get_headers()).json()
+        result = requests.get(url, headers=self.get_headers()).json()
+        return result
     
     def get_me(self):
         return User.from_feed_json(self.request(self.ME_URL)["users"])

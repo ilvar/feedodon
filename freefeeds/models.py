@@ -5,7 +5,7 @@ from django.db import models
 class FfToMdConvertorMixin:
     @staticmethod
     def dt_from_frf(frf_ts):
-        arrow.get(int(frf_ts) / 1000).format('YYYY-MM-DDTHH:mm:ss.SSS') + "Z"
+        return arrow.get(int(frf_ts) / 1000).format('YYYY-MM-DDTHH:mm:ss.SSS') + "Z"
 
     @staticmethod
     def dt_to_md(dt):

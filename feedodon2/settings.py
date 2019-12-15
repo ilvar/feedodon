@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'oauth2_provider',
     
     'freefeeds',
+    'feed_auth',
 ]
 
 MIDDLEWARE = [

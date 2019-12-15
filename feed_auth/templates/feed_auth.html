@@ -1,0 +1,38 @@
+<html>
+  <head>
+    <title>Feedik -> Mastodon API bridge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      .container {
+        margin: 0 auto 0;
+        max-width: 1000px;
+      }
+
+      ul.errorlist {
+        color: #d32f2f;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>Feedik -> Mastodon API bridge</h1>
+
+      <p>
+        Please provide your App Token (don't have one? <a href="https://freefeed.net/settings/app-tokens">create
+        it</a> first). We're not saving it anywhere on the server, just sending back to {{ request.GET.redirect_uri }}
+        (your app).
+      </p>
+
+      <form action="/oauth/authorize?redirect_uri={{ request.GET.redirect_uri|urlencode }}" method="POST">
+        {{ form.as_p }}
+        <p><button type="submit">Submit</button></p>
+      </form>
+
+      <p>
+        <a href="https://github.com/ilvar/feedodon">Source code</a>
+      </p>
+    </div>
+  </body>
+</html>
