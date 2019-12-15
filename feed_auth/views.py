@@ -1,3 +1,6 @@
+import json
+
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 
 from feed_auth.forms import AuthForm
@@ -19,3 +22,8 @@ def oauth_authorize(request):
     else:
         form = AuthForm()
     return render(request, "feed_auth.html", {"form": form})
+
+
+def oauth_token(request):
+    code = request.GET.get("code", request.POST["code"])
+    return HttpResponse(json.dumps({"access_token": code}), content_type="application/json")

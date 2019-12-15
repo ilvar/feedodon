@@ -19,6 +19,7 @@ class Client:
         
     @staticmethod
     def from_request(request):
+        print(list(request.META.keys()))
         return Client(request.META["AUTHORIZATION"].replace("Bearer ", ""))
         
     def get_headers(self):
