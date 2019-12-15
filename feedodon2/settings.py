@@ -20,10 +20,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'a8w!u9@au6oysqyo$8xh@(ng&wglb_u35_9(ne@ukh(4zl#d%b'
+SECRET_KEY = os.environ.get("SECRET_KEY", 'a8w!u9@au6oysqyo$8xh@(ng&wglb_u35_9(ne@ukh(4zl#d%b')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG") == "TRUE"
 
 ALLOWED_HOSTS = ['*']
 
@@ -74,7 +74,7 @@ WSGI_APPLICATION = 'feedodon2.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, 'db', 'db.sqlite3'),
     }
 }
 
