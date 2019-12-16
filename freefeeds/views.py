@@ -39,6 +39,8 @@ def status_context(request, md_id):
     })
 
 def status_post(request):
+    print(request.POST)
+    print(request.body)
     return _generic_feed_data(request, lambda c: c.new_post_or_comment(json.loads(request.body)))
 
 def filters(request):
