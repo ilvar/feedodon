@@ -61,11 +61,9 @@ feed heavily and rely on status ordering for pagination
 
 ## TODO
 
-- user timelines
-- posting
-- commenting
-- notifications
 - fav/like
+- uploads
+- notifications
 - Index page (redirect to github?)
 - proper DB
 - docker-compose

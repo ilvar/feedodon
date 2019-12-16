@@ -9,7 +9,10 @@ class Client:
     app_key = None
 
     HOME_URL = "https://freefeed.net/v2/timelines/home"
-    POST_URL = "https://freefeed.net/v2/posts/%s?maxComments=all"
+    USER_FEED_URL = "https://freefeed.net/v2/timelines/%s"
+    POSTS_URL = "https://freefeed.net/v2/posts/%s?maxComments=all"
+    NEW_POST_URL = "https://freefeed.net/v1/posts/"
+    NEW_COMMENT_URL = "https://freefeed.net/v1/comments/"
     ME_URL = "https://freefeed.net/v1/users/me"
     
     def __init__(self, app_key):
@@ -26,14 +29,17 @@ class Client:
           "Authorization": "Bearer %s" % self.app_key
         }
     
-    def request(self, url):
-        result = requests.get(url, headers=self.get_headers()).json()
+    def request(self, url, method="GET", data=None):
+        result = requests.request(method, url, headers=self.get_headers(), json=data).json()
         return result
     
     def get_me(self):
         return User.from_feed_json(self.request(self.ME_URL)["users"])
 
     def get_home(self, limit=120, max_id=None, since_id=None):
+        return self.get_feed(self.HOME_URL, limit, max_id, since_id)
+
+    def get_feed(self, url, limit=120, max_id=None, since_id=None):
         if max_id is not None and max_id != 0:
             max_created_at = Post.objects.get(pk=max_id).created_at
         else:
@@ -52,14 +58,14 @@ class Client:
             params["created-before"] = max_created_at
         if min_created_at:
             params["created-after"] = min_created_at
-        ff_data = self.request(self.HOME_URL + "?" + urllib.parse.urlencode(params))
+        ff_data = self.request(url + "?" + urllib.parse.urlencode(params))
         posts = [Post.from_feed_json(p, ff_data["users"], ff_data["attachments"]) for p in ff_data["posts"]]
         
         return posts
     
     def get_post(self, md_id):
         md_post = Post.objects.get(pk=md_id)
-        ff_data = self.request(self.POST_URL % md_post.feed_id)
+        ff_data = self.request(self.POSTS_URL % md_post.feed_id)
         post = Post.from_feed_json(ff_data["posts"], ff_data["users"], ff_data["attachments"])
         
         comments = [Post.from_feed_comment_json(post, c, ff_data["users"]) for c in ff_data["comments"]]
@@ -69,10 +75,45 @@ class Client:
         # TODO
         return []
     
-    def get_user_timeline(self, md_id):
-        # TODO
-        return []
+    def get_user_timeline(self, md_id, limit=120, max_id=None, since_id=None):
+        md_user = User.objects.get(pk=md_id)
+        return self.get_feed(self.USER_FEED_URL % md_user.username, limit, max_id, since_id)
     
-    def post(self):
-        # TODO: posting AND commenting
-        return None
+    def new_post_or_comment(self, md_data):
+        reply_id = md_data.get("in_reply_to_id", None)
+        if reply_id is not None:
+            post = Post.objects.get(pk=reply_id)
+            
+            if post.parent:
+                postId = post.parent.feed_id
+            else:
+                postId = post.feed_id
+                
+            feed_data = {
+                "comment": {
+                    "body": md_data["status"],
+                    "postId": postId
+                }
+            }
+
+            new_comment = self.request(self.NEW_COMMENT_URL, method="POST", data=feed_data)
+            print("New post", new_comment)
+            new_md_post = Post.from_feed_comment_json(post, new_comment["comments"], new_comment["users"])
+        else:
+            feed_data = {
+                "post": {
+                    "body": md_data["status"],
+                    "attachments": []
+                },
+                "meta": {
+                    "commentsDisabled": False,
+                    "feeds": [self.get_me().username]
+                }
+            }
+    
+            new_post = self.request(self.NEW_POST_URL, method="POST", data=feed_data)
+            print("New post", new_post)
+
+            new_md_post = Post.from_feed_json(new_post["posts"], new_post["users"], [])
+        
+        return new_md_post.to_md_json()

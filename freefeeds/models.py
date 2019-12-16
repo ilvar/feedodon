@@ -102,17 +102,17 @@ class Post(models.Model, FfToMdConvertorMixin):
                 parent=parent_post,
                 user=md_user,
                 body=ff_comment["body"],
-                comment_likes=ff_comment["likes"],
+                comment_likes=ff_comment.get("likes", 0),
                 comments_disabled=False,
                 created_at=Post.dt_from_frf(ff_comment["createdAt"]),
-                updated_at=Post.dt_from_frf(ff_comment["updatedAt"]),
+                updated_at=Post.dt_from_frf(ff_comment.get("updatedAt", ff_comment["createdAt"])),
             )
 
     def get_absolute_url(self):
         if self.parent is not None:
-            return "https://freefeed.org/%s/%s" % (self.parent.user.username, self.parent.pk)
+            return "https://freefeed.org/%s/%s" % (self.parent.user.username, self.parent.feed_id)
         else:
-            return "https://freefeed.org/%s/%s" % (self.user.username, self.pk)
+            return "https://freefeed.org/%s/%s" % (self.user.username, self.feed_id)
 
     def to_md_json(self):
         return {

@@ -10,6 +10,7 @@ urlpatterns = [
     path('v1/timelines/home', views.timelines_home),
     path('v1/statuses/<int:md_id>/context', views.status_context),
     path('v1/statuses/<int:md_id>', views.status_detail),
+    path('v1/statuses', views.status_post),
 
     path('v1/filters', views.filters),
     path('v1/notifications', views.notifications),
