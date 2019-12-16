@@ -34,12 +34,12 @@ class Client:
         return User.from_feed_json(self.request(self.ME_URL)["users"])
 
     def get_home(self, limit=120, max_id=None, since_id=None):
-        if max_id is not None:
+        if max_id is not None and max_id != 0:
             max_created_at = Post.objects.get(pk=max_id).created_at
         else:
             max_created_at = None
     
-        if since_id is not None:
+        if since_id is not None and since_id != 0:
             min_created_at = Post.objects.get(pk=since_id).created_at
         else:
             min_created_at = None

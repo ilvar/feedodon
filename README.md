@@ -66,6 +66,7 @@ feed heavily and rely on status ordering for pagination
 - commenting
 - notifications
 - fav/like
+- Index page (redirect to github?)
 - proper DB
 - docker-compose
     - traefik

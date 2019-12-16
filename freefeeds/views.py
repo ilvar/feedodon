@@ -90,3 +90,8 @@ def nodeinfo_v2(request):
     }
     return HttpResponse(json.dumps(data), content_type="application/json")
 
+def direct_messages(request):
+    return HttpResponse(json.dumps([]), content_type="application/json")
+
+def saved_searches(request):
+    return HttpResponse(json.dumps([]), content_type="application/json")
