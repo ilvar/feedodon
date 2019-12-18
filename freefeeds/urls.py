@@ -9,6 +9,8 @@ urlpatterns = [
     path('v1/timelines/public', views.timelines_public),
     path('v1/timelines/home', views.timelines_home),
     path('v1/statuses/<int:md_id>/context', views.status_context),
+    path('v1/statuses/<int:md_id>/favourite', views.status_like),
+    path('v1/statuses/<int:md_id>/unfavourite', views.status_unlike),
     path('v1/statuses/<int:md_id>', views.status_detail),
     path('v1/statuses', views.status_post),
 

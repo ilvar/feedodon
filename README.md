@@ -40,8 +40,11 @@ You _don't have to_ go through OAuth to use the API.
 
 ## Features
 
-Stores bare minimum of necessary data on the server: only mapping from
-Freefeed UUIDs to Mastodon-compatible integer IDs.
+- Home feed
+- Comments
+- Posting
+- Commenting
+- Likes/unlikes
 
 Tested with:
 
@@ -61,9 +64,8 @@ feed heavily and rely on status ordering for pagination
 
 ## TODO
 
-- fav/like
-- uploads
 - notifications
+- uploads
 - Index page (redirect to github?)
 - proper DB
 - docker-compose

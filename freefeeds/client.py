@@ -11,10 +11,17 @@ class Client:
     HOME_URL = "https://freefeed.net/v2/timelines/home"
     USER_FEED_URL = "https://freefeed.net/v2/timelines/%s"
     POSTS_URL = "https://freefeed.net/v2/posts/%s?maxComments=all"
+
     NEW_POST_URL = "https://freefeed.net/v1/posts/"
     NEW_COMMENT_URL = "https://freefeed.net/v1/comments/"
+
     ME_URL = "https://freefeed.net/v1/users/me"
-    
+
+    POST_LIKE_URL = "https://freefeed.net/v1/posts/%s/like"
+    POST_UNLIKE_URL = "https://freefeed.net/v1/posts/%s/unlike"
+    COMMENT_LIKE_URL = "https://freefeed.net/v2/comments/%s/like"
+    COMMENT_UNLIKE_URL = "https://freefeed.net/v2/comments/%s/unlike"
+
     def __init__(self, app_key):
         if not app_key:
             raise RuntimeError("App key is invalid")
@@ -78,7 +85,25 @@ class Client:
     def get_user_timeline(self, md_id, limit=120, max_id=None, since_id=None):
         md_user = User.objects.get(pk=md_id)
         return self.get_feed(self.USER_FEED_URL % md_user.username, limit, max_id, since_id)
+
+    def post_like(self, md_id):
+        post = Post.objects.get(pk=md_id)
     
+        if post.parent is not None:
+            self.request(self.COMMENT_LIKE_URL % post.feed_id, method="POST")
+        else:
+            self.request(self.POST_LIKE_URL % post.feed_id, method="POST")
+        return post
+
+    def post_unlike(self, md_id):
+        post = Post.objects.get(pk=md_id)
+    
+        if post.parent is not None:
+            self.request(self.COMMENT_UNLIKE_URL % post.feed_id, method="POST")
+        else:
+            self.request(self.POST_UNLIKE_URL % post.feed_id, method="POST")
+        return post
+
     def new_post_or_comment(self, md_data):
         reply_id = md_data.get("in_reply_to_id", None)
         if reply_id is not None:
@@ -97,7 +122,6 @@ class Client:
             }
 
             new_comment = self.request(self.NEW_COMMENT_URL, method="POST", data=feed_data)
-            print("New post", new_comment)
             new_md_post = Post.from_feed_comment_json(post, new_comment["comments"], new_comment["users"])
         else:
             feed_data = {
@@ -112,8 +136,6 @@ class Client:
             }
     
             new_post = self.request(self.NEW_POST_URL, method="POST", data=feed_data)
-            print("New post", new_post)
-
             new_md_post = Post.from_feed_json(new_post["posts"], new_post["users"], [])
         
         return new_md_post.to_md_json()
