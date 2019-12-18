@@ -46,8 +46,8 @@ class User(models.Model, FfToMdConvertorMixin):
             "following_count": 0,
             "statuses_count": 0,
             "note": "",
-            "uri": "https://freefeed.org/%s" % self.username,
-            "url": "https://freefeed.org/%s" % self.username,
+            "uri": "https://freefeed.net/%s" % self.username,
+            "url": "https://freefeed.net/%s" % self.username,
             "avatar": self.avatar_url,
             "avatar_static": self.avatar_url,
             "header": "",
@@ -110,9 +110,9 @@ class Post(models.Model, FfToMdConvertorMixin):
 
     def get_absolute_url(self):
         if self.parent is not None:
-            return "https://freefeed.org/%s/%s" % (self.parent.user.username, self.parent.feed_id)
+            return "https://freefeed.net/%s/%s" % (self.parent.user.username, self.parent.feed_id)
         else:
-            return "https://freefeed.org/%s/%s" % (self.user.username, self.feed_id)
+            return "https://freefeed.net/%s/%s" % (self.user.username, self.feed_id)
 
     def to_md_json(self):
         return {
@@ -141,7 +141,7 @@ class Post(models.Model, FfToMdConvertorMixin):
     
 class Attachment(models.Model, FfToMdConvertorMixin):
     feed_id = models.CharField(max_length=100, db_index=True)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True)
     media_type = models.CharField(max_length=100)
     url = models.CharField(max_length=256)
     thumbnail_url = models.CharField(max_length=256)
@@ -151,7 +151,11 @@ class Attachment(models.Model, FfToMdConvertorMixin):
     @staticmethod
     def from_feed_json(md_post, ff_attachment):
         try:
-            return Attachment.objects.get(feed_id=ff_attachment["id"])
+            attachment = Attachment.objects.get(feed_id=ff_attachment["id"])
+            if attachment.post is None and md_post is not None:
+                attachment.post = md_post
+                attachment.save()
+            return attachment
         except Attachment.DoesNotExist:
             return Attachment.objects.create(
                 feed_id=ff_attachment["id"],

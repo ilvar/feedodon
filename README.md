@@ -45,6 +45,7 @@ You _don't have to_ go through OAuth to use the API.
 - Posting
 - Commenting
 - Likes/unlikes
+- uploads
 
 Tested with:
 
@@ -65,7 +66,6 @@ feed heavily and rely on status ordering for pagination
 ## TODO
 
 - notifications
-- uploads
 - Index page (redirect to github?)
 - proper DB
 - docker-compose

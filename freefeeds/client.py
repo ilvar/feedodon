@@ -2,7 +2,7 @@ import urllib.parse
 
 import requests
 
-from freefeeds.models import User, Post
+from freefeeds.models import User, Post, Attachment
 
 
 class Client:
@@ -12,8 +12,9 @@ class Client:
     USER_FEED_URL = "https://freefeed.net/v2/timelines/%s"
     POSTS_URL = "https://freefeed.net/v2/posts/%s?maxComments=all"
 
-    NEW_POST_URL = "https://freefeed.net/v1/posts/"
-    NEW_COMMENT_URL = "https://freefeed.net/v1/comments/"
+    NEW_POST_URL = "https://freefeed.net/v1/posts"
+    NEW_COMMENT_URL = "https://freefeed.net/v1/comments"
+    NEW_ATTACHMENT_URL = "https://freefeed.net/v1/attachments"
 
     ME_URL = "https://freefeed.net/v1/users/me"
 
@@ -36,8 +37,8 @@ class Client:
           "Authorization": "Bearer %s" % self.app_key
         }
     
-    def request(self, url, method="GET", data=None):
-        result = requests.request(method, url, headers=self.get_headers(), json=data).json()
+    def request(self, url, method="GET", data=None, **kwargs):
+        result = requests.request(method, url, headers=self.get_headers(), json=data, **kwargs).json()
         return result
     
     def get_me(self):
@@ -127,7 +128,7 @@ class Client:
             feed_data = {
                 "post": {
                     "body": md_data["status"],
-                    "attachments": []
+                    "attachments": [Attachment.objects.get(pk=aid).feed_id for aid in md_data["media_ids"]]
                 },
                 "meta": {
                     "commentsDisabled": False,
@@ -138,4 +139,8 @@ class Client:
             new_post = self.request(self.NEW_POST_URL, method="POST", data=feed_data)
             new_md_post = Post.from_feed_json(new_post["posts"], new_post["users"], [])
         
-        return new_md_post.to_md_json()
+        return new_md_post
+    
+    def new_attachment(self, md_file):
+        result = self.request(self.NEW_ATTACHMENT_URL, method="POST", files={"file": md_file})
+        return Attachment.from_feed_json(None, result['attachments'])

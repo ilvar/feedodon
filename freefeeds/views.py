@@ -39,13 +39,16 @@ def status_context(request, md_id):
     })
 
 def status_post(request):
-    return _generic_feed_data(request, lambda c: c.new_post_or_comment(request.POST))
+    return _generic_feed_data(request, lambda c: c.new_post_or_comment(request.POST).to_md_json())
 
 def status_like(request, md_id):
     return _generic_feed_data(request, lambda c: c.post_like(md_id).to_md_json())
 
 def status_unlike(request, md_id):
     return _generic_feed_data(request, lambda c: c.post_unlike(md_id).to_md_json())
+
+def upload_attachment(request):
+    return _generic_feed_data(request, lambda c: c.new_attachment(request.FILES["file"]).to_md_json())
 
 def filters(request):
     return _generic_feed_data(request, lambda c: [])
