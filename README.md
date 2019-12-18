@@ -66,6 +66,9 @@ feed heavily and rely on status ordering for pagination
 ## TODO
 
 - notifications
+- Not Found: /api/direct_messages/sent.json
+- Not Found: /api/saved_searches/list.json
+- Not Found: /api/v1/custom_emojis
 - Index page (redirect to github?)
 - proper DB
 - docker-compose

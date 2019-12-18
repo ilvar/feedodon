@@ -128,7 +128,7 @@ class Client:
             feed_data = {
                 "post": {
                     "body": md_data["status"],
-                    "attachments": [Attachment.objects.get(pk=aid).feed_id for aid in md_data["media_ids"]]
+                    "attachments": [Attachment.objects.get(pk=aid).feed_id for aid in md_data.getlist("media_ids[]")]
                 },
                 "meta": {
                     "commentsDisabled": False,
