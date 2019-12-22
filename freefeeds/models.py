@@ -60,56 +60,62 @@ class Post(models.Model, FfToMdConvertorMixin):
     feed_id = models.CharField(max_length=100, db_index=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
-    body = models.TextField()
-    likes = models.IntegerField(default=0)
-    comments = models.IntegerField(default=0)
-    comments_disabled = models.BooleanField()
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField()
 
     @staticmethod
     def from_feed_json(ff_post, all_ff_users, all_ff_attachments):
         try:
-            return Post.objects.get(feed_id=ff_post["id"], parent__isnull=True)
+            md_post = Post.objects.get(feed_id=ff_post["id"], parent__isnull=True)
         except Post.DoesNotExist:
             ff_user = [u for u in all_ff_users if u["id"] == ff_post["createdBy"]][0]
             md_user = User.from_feed_json(ff_user)
-            post = Post.objects.create(
+            md_post = Post.objects.create(
                 feed_id=ff_post["id"],
                 parent = None,
                 user=md_user,
-                body=ff_post["body"],
-                likes=len(ff_post["likes"]) + ff_post["omittedLikes"],
-                comments=len(ff_post["comments"]) + ff_post["omittedComments"],
-                comments_disabled=ff_post["commentsDisabled"],
-                created_at=Post.dt_from_frf(ff_post["createdAt"]),
-                updated_at=Post.dt_from_frf(ff_post["updatedAt"])
             )
-        
-            for ff_attachment in all_ff_attachments:
-                if ff_attachment["id"] in ff_post["attachments"] and ff_attachment["mediaType"] == "image":
-                    Attachment.from_feed_json(post, ff_attachment)
-        
-            return post
+
+        md_post.data = dict(
+            body=ff_post["body"],
+            likes=len(ff_post["likes"]) + ff_post["omittedLikes"],
+            comments=len(ff_post["comments"]) + ff_post["omittedComments"],
+            comments_disabled=ff_post["commentsDisabled"],
+            created_at=Post.dt_from_frf(ff_post["createdAt"]),
+            updated_at=Post.dt_from_frf(ff_post["updatedAt"])
+        )
+
+        md_post.attachments = []
+    
+        for ff_attachment in all_ff_attachments:
+            if ff_attachment["id"] in ff_post["attachments"] and ff_attachment["mediaType"] == "image":
+                md_post.attachments.append(Attachment.from_feed_json(md_post, ff_attachment))
+    
+        return md_post
 
     @staticmethod
     def from_feed_comment_json(parent_post, ff_comment, all_ff_users):
         try:
-            return Post.objects.get(feed_id=ff_comment["id"])
+            md_post = Post.objects.get(feed_id=ff_comment["id"])
         except Post.DoesNotExist:
             ff_user = [u for u in all_ff_users if u["id"] == ff_comment["createdBy"]][0]
             md_user = User.from_feed_json(ff_user)
-            return Post.objects.create(
+            md_post = Post.objects.create(
                 feed_id=ff_comment["id"],
                 parent=parent_post,
-                user=md_user,
-                body=ff_comment["body"],
-                likes=ff_comment.get("likes", 0),
-                comments=0,
-                comments_disabled=False,
-                created_at=Post.dt_from_frf(ff_comment["createdAt"]),
-                updated_at=Post.dt_from_frf(ff_comment.get("updatedAt", ff_comment["createdAt"])),
+                user=md_user
             )
+            
+        md_post.attachments = []
+
+        md_post.data = dict(
+            body=ff_comment["body"],
+            likes=ff_comment.get("likes", 0),
+            comments=0,
+            comments_disabled=False,
+            created_at=Post.dt_from_frf(ff_comment["createdAt"]),
+            updated_at=Post.dt_from_frf(ff_comment.get("updatedAt", ff_comment["createdAt"])),
+        )
+
+        return md_post
 
     def get_absolute_url(self):
         if self.parent is not None:
@@ -123,18 +129,18 @@ class Post(models.Model, FfToMdConvertorMixin):
             "uri": self.get_absolute_url(),
             "url": self.get_absolute_url(),
             "account": self.user.to_md_json(),
-            "content": self.body,
-            "created_at": Post.dt_to_md(self.created_at),
+            "content": self.data["body"],
+            "created_at": Post.dt_to_md(self.data["created_at"]),
             "emojis": [],
-            "replies_count": self.comments,
-            "reblogs_count": 0,
-            "favourites_count": self.likes,
+            "replies_count": self.data["comments"],
+            "reblogs_count": self.data["comments"],
+            "favourites_count": self.data["likes"],
             "sensitive": False,
             "reblog": None,
             "in_reply_to_id": None,
             "spoiler_text": "",
             "visibility": "public",
-            "media_attachments": [a.to_md_json() for a in self.attachment_set.all()],
+            "media_attachments": [a.to_md_json() for a in self.attachments],
             "mentions": [],
             "tags": [],
             "application": {"name": "Freefeed"},
@@ -145,42 +151,40 @@ class Post(models.Model, FfToMdConvertorMixin):
 class Attachment(models.Model, FfToMdConvertorMixin):
     feed_id = models.CharField(max_length=100, db_index=True)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True)
-    media_type = models.CharField(max_length=100)
-    url = models.CharField(max_length=256)
-    thumbnail_url = models.CharField(max_length=256)
-    width = models.IntegerField(null=True)
-    height = models.IntegerField(null=True)
 
     @staticmethod
     def from_feed_json(md_post, ff_attachment):
         try:
-            attachment = Attachment.objects.get(feed_id=ff_attachment["id"])
-            if attachment.post is None and md_post is not None:
-                attachment.post = md_post
-                attachment.save()
-            return attachment
+            att = Attachment.objects.get(feed_id=ff_attachment["id"])
+            if att.post is None and md_post is not None:
+                att.post = md_post
+                att.save()
         except Attachment.DoesNotExist:
-            return Attachment.objects.create(
+            att = Attachment.objects.create(
                 feed_id=ff_attachment["id"],
-                post=md_post,
-                media_type=ff_attachment["mediaType"],
-                url=ff_attachment["url"],
-                thumbnail_url=ff_attachment["thumbnailUrl"],
-                width=ff_attachment["imageSizes"]["o"]["w"],
-                height=ff_attachment["imageSizes"]["o"]["h"],
+                post=md_post
             )
+            
+        att.data = dict(
+            media_type=ff_attachment["mediaType"],
+            url=ff_attachment["url"],
+            thumbnail_url=ff_attachment["thumbnailUrl"],
+            width=ff_attachment["imageSizes"]["o"]["w"],
+            height=ff_attachment["imageSizes"]["o"]["h"]
+        )
+        return att
     
     def to_md_json(self):
         return {
-        "id": self.pk,
-        "type": self.media_type,
-        "url": self.url,
-        "remote_url": self.url,
-        "preview_url": self.thumbnail_url,
-        "text_url": "",
-        "meta": (self.width and self.height) and{
-          "width": self.width,
-          "height": self.height
-        } or {},
-        "description": ""
-      }
+            "id": self.pk,
+            "type": self.data["media_type"],
+            "url": self.data["url"],
+            "remote_url": self.data["url"],
+            "preview_url": self.data["thumbnail_url"],
+            "text_url": "",
+            "meta": (self.data["width"] and self.data["height"]) and{
+              "width": self.data["width"],
+              "height": self.data["height"]
+            } or {},
+            "description": ""
+        }
