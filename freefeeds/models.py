@@ -60,6 +60,7 @@ class Post(models.Model, FfToMdConvertorMixin):
     feed_id = models.CharField(max_length=100, db_index=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
+    created_at = models.DateTimeField(null=True)
 
     @staticmethod
     def from_feed_json(ff_post, all_ff_users, all_ff_attachments):
@@ -72,6 +73,7 @@ class Post(models.Model, FfToMdConvertorMixin):
                 feed_id=ff_post["id"],
                 parent = None,
                 user=md_user,
+                created_at=Post.dt_from_frf(ff_post["createdAt"])
             )
 
         md_post.data = dict(
@@ -79,7 +81,6 @@ class Post(models.Model, FfToMdConvertorMixin):
             likes=len(ff_post["likes"]) + ff_post["omittedLikes"],
             comments=len(ff_post["comments"]) + ff_post["omittedComments"],
             comments_disabled=ff_post["commentsDisabled"],
-            created_at=Post.dt_from_frf(ff_post["createdAt"]),
             updated_at=Post.dt_from_frf(ff_post["updatedAt"])
         )
 
@@ -101,7 +102,8 @@ class Post(models.Model, FfToMdConvertorMixin):
             md_post = Post.objects.create(
                 feed_id=ff_comment["id"],
                 parent=parent_post,
-                user=md_user
+                user=md_user,
+                created_at=Post.dt_from_frf(ff_comment["createdAt"])
             )
             
         md_post.attachments = []
@@ -111,7 +113,6 @@ class Post(models.Model, FfToMdConvertorMixin):
             likes=ff_comment.get("likes", 0),
             comments=0,
             comments_disabled=False,
-            created_at=Post.dt_from_frf(ff_comment["createdAt"]),
             updated_at=Post.dt_from_frf(ff_comment.get("updatedAt", ff_comment["createdAt"])),
         )
 
@@ -130,7 +131,7 @@ class Post(models.Model, FfToMdConvertorMixin):
             "url": self.get_absolute_url(),
             "account": self.user.to_md_json(),
             "content": self.data["body"],
-            "created_at": Post.dt_to_md(self.data["created_at"]),
+            "created_at": Post.dt_to_md(self.created_at),
             "emojis": [],
             "replies_count": self.data["comments"],
             "reblogs_count": self.data["comments"],
