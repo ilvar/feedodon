@@ -61,7 +61,8 @@ class Post(models.Model, FfToMdConvertorMixin):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
     body = models.TextField()
-    comment_likes = models.IntegerField()
+    likes = models.IntegerField(default=0)
+    comments = models.IntegerField(default=0)
     comments_disabled = models.BooleanField()
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
@@ -78,7 +79,8 @@ class Post(models.Model, FfToMdConvertorMixin):
                 parent = None,
                 user=md_user,
                 body=ff_post["body"],
-                comment_likes=ff_post["commentLikes"],
+                likes=len(ff_post["likes"]) + ff_post["omittedLikes"],
+                comments=len(ff_post["comments"]) + ff_post["omittedComments"],
                 comments_disabled=ff_post["commentsDisabled"],
                 created_at=Post.dt_from_frf(ff_post["createdAt"]),
                 updated_at=Post.dt_from_frf(ff_post["updatedAt"])
@@ -102,7 +104,8 @@ class Post(models.Model, FfToMdConvertorMixin):
                 parent=parent_post,
                 user=md_user,
                 body=ff_comment["body"],
-                comment_likes=ff_comment.get("likes", 0),
+                likes=ff_comment.get("likes", 0),
+                comments=0,
                 comments_disabled=False,
                 created_at=Post.dt_from_frf(ff_comment["createdAt"]),
                 updated_at=Post.dt_from_frf(ff_comment.get("updatedAt", ff_comment["createdAt"])),
@@ -123,9 +126,9 @@ class Post(models.Model, FfToMdConvertorMixin):
             "content": self.body,
             "created_at": Post.dt_to_md(self.created_at),
             "emojis": [],
-            "replies_count": self.comment_likes,
+            "replies_count": self.comments,
             "reblogs_count": 0,
-            "favourites_count": 0,
+            "favourites_count": self.likes,
             "sensitive": False,
             "reblog": None,
             "in_reply_to_id": None,
