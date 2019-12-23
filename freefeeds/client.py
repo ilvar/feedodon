@@ -49,12 +49,18 @@ class Client:
 
     def get_feed(self, url, limit=120, max_id=None, since_id=None):
         if max_id is not None and max_id != 0:
-            max_created_at = Post.objects.get(pk=max_id).created_at
+            try:
+                max_created_at = Post.objects.get(pk=max_id).created_at
+            except Post.DoesNotExist:
+                max_created_at = None
         else:
             max_created_at = None
     
         if since_id is not None and since_id != 0:
-            min_created_at = Post.objects.get(pk=since_id).created_at
+            try:
+                min_created_at = Post.objects.get(pk=since_id).created_at
+            except Post.DoesNotExist:
+                min_created_at = None
         else:
             min_created_at = None
     
