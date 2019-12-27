@@ -100,7 +100,7 @@ class Client:
             self.request(self.COMMENT_LIKE_URL % post.feed_id, method="POST")
         else:
             self.request(self.POST_LIKE_URL % post.feed_id, method="POST")
-        return post
+        return self.get_post(md_id)
 
     def post_unlike(self, md_id):
         post = Post.objects.get(pk=md_id)
@@ -109,7 +109,7 @@ class Client:
             self.request(self.COMMENT_UNLIKE_URL % post.feed_id, method="POST")
         else:
             self.request(self.POST_UNLIKE_URL % post.feed_id, method="POST")
-        return post
+        return self.get_post(md_id)
 
     def new_post_or_comment(self, md_data):
         reply_id = md_data.get("in_reply_to_id", None)
