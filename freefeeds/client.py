@@ -143,6 +143,7 @@ class Client:
             }
     
             new_post = self.request(self.NEW_POST_URL, method="POST", data=feed_data)
+            print("new_post", new_post)
             new_md_post = Post.from_feed_json(new_post["posts"], new_post["users"], [])
         
         return new_md_post

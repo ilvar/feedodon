@@ -116,3 +116,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+if not DEBUG:
+    MIDDLEWARE = MIDDLEWARE + ['rollbar.contrib.django.middleware.RollbarNotifierMiddleware']
+    
+    ROLLBAR = {
+        'access_token': os.environ["ROLLBAR_TOKEN"],
+        'environment': 'development' if DEBUG else 'production',
+        'root': BASE_DIR,
+    }
+    import rollbar
+    
+    rollbar.init(**ROLLBAR)
