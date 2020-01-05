@@ -121,7 +121,7 @@ if not DEBUG:
     MIDDLEWARE = MIDDLEWARE + ['rollbar.contrib.django.middleware.RollbarNotifierMiddleware']
     
     ROLLBAR = {
-        'access_token': os.environ["ROLLBAR_TOKEN"],
+        'access_token': os.environ.get("ROLLBAR_TOKEN", "DUMMY"),
         'environment': 'development' if DEBUG else 'production',
         'root': BASE_DIR,
     }
