@@ -123,7 +123,7 @@ class Client:
                 
             feed_data = {
                 "comment": {
-                    "body": md_data["status"],
+                    "body": md_data["status"] or '.',
                     "postId": postId
                 }
             }
@@ -133,7 +133,7 @@ class Client:
         else:
             feed_data = {
                 "post": {
-                    "body": md_data["status"],
+                    "body": md_data["status"] or '.',
                     "attachments": [Attachment.objects.get(pk=aid).feed_id for aid in md_data.getlist("media_ids[]")]
                 },
                 "meta": {
@@ -143,7 +143,6 @@ class Client:
             }
     
             new_post = self.request(self.NEW_POST_URL, method="POST", data=feed_data)
-            print("new_post", new_post)
             new_md_post = Post.from_feed_json(new_post["posts"], new_post["users"], [])
         
         return new_md_post
