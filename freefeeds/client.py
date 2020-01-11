@@ -99,7 +99,7 @@ class Client:
         if post.parent is not None:
             self.request(self.COMMENT_LIKE_URL % post.feed_id, method="POST")
             comments = self.get_post(post.parent_id)[1:]
-            comment = [p.to_md_json() for p in comments if p.id == md_id][0]
+            comment = [p for p in comments if p.id == md_id][0]
             return comment
         else:
             self.request(self.POST_LIKE_URL % post.feed_id, method="POST")
