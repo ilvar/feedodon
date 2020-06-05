@@ -51,7 +51,7 @@
                 "sha256:c91c91a7ad6ef67a874a4f76f58ba534f9208412692a840e1d125eb5c279cb0a"
             ],
             "index": "pypi",
-            "version": "==3.0.3"
+            "version": ">=3.0.7"
         },
         "django-oauth-toolkit": {
             "hashes": [
