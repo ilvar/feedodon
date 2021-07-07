@@ -13,8 +13,8 @@ def _generic_feed_data(request, client_handler):
 def verify_credentials(request):
     return _generic_feed_data(request, lambda c: c.get_me().to_md_json())
 
-def timelines_account(request):
-    return _generic_feed_data(request, lambda c: [p.to_md_json() for p in c.get_user_timeline()])
+def timelines_account(request, uid):
+    return _generic_feed_data(request, lambda c: [p.to_md_json() for p in c.get_user_timeline(uid)])
 
 def timelines_public(request):
     return _generic_feed_data(request, lambda c: [])
