@@ -11,4 +11,5 @@ urlpatterns = [
     path('api/', include('freefeeds.urls')),
     path('.well-known/nodeinfo', freefeeds.views.nodeinfo_v1),
     path('nodeinfo/2.0', freefeeds.views.nodeinfo_v2),
+    path('', include('freefeeds.urls')),
 ]
