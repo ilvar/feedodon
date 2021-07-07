@@ -93,6 +93,10 @@ class Client:
         md_user = User.objects.get(pk=md_id)
         return self.get_feed(self.USER_FEED_URL % md_user.username, limit, max_id, since_id)
 
+    def get_user(self, md_id):
+        md_user = User.objects.get(pk=md_id)
+        return md_user
+
     def post_like(self, md_id):
         post = Post.objects.get(pk=md_id)
     

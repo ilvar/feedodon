@@ -4,6 +4,7 @@ from freefeeds import views
 
 urlpatterns = [
     path('v1/accounts/verify_credentials', views.verify_credentials),
+    path('v1/accounts/<int:uid>', views.account),
     path('v1/accounts/<int:uid>/statuses', views.timelines_account),
 
     path('v1/timelines/public', views.timelines_public),
