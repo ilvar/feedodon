@@ -165,13 +165,13 @@ class Attachment(models.Model, FfToMdConvertorMixin):
                 feed_id=ff_attachment["id"],
                 post=md_post
             )
-            
+
         att.data = dict(
             media_type=ff_attachment["mediaType"],
-            url=ff_attachment["url"],
+            url=ff_attachment["imageSizes"].get("t2", ff_attachment)["url"],
             thumbnail_url=ff_attachment["thumbnailUrl"],
-            width=ff_attachment["imageSizes"]["o"]["w"],
-            height=ff_attachment["imageSizes"]["o"]["h"]
+            width=ff_attachment["imageSizes"]["t2"]["w"],
+            height=ff_attachment["imageSizes"]["t2"]["h"]
         )
         return att
     
