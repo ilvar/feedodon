@@ -1,10 +1,10 @@
 arrow==0.15.4
-Django==3.0.1
+Django==3.1.12
 django-oauth-toolkit==1.2.0
 oauthlib==3.1.0
 python-dateutil==2.8.1
 pytz==2019.3
 requests==2.22.0
-urllib3==1.25.7
+urllib3==1.26.5
 gunicorn
 rollbar
